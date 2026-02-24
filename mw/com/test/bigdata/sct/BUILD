@@ -12,23 +12,15 @@
 # *******************************************************************************
 
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
-load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("@score_itf//:defs.bzl", "py_itf_test")
 load("@score_itf//score/itf/plugins:plugins.bzl", "docker")
 
-# Package the stub binary into the path the test expects:
-#   /opt/bigdata/bin/bigdata
-pkg_tar(
-    name = "bigdata-stub-pkg",
-    srcs = ["stub/bigdata"],
-    package_dir = "opt/bigdata/bin",
-    strip_prefix = "stub",
-)
-
+# Use the pre-built bigdata package from the monorepo.
+# Contains opt/bigdata/bin/bigdata + config files in opt/bigdata/etc/
 oci_image(
     name = "test-image",
     base = "@ubuntu_24_04",
-    tars = [":bigdata-stub-pkg"],
+    tars = ["prebuilt/bigdata-pkg.tar.gz"],
 )
 
 oci_tarball(
@@ -39,7 +31,10 @@ oci_tarball(
 
 py_itf_test(
     name = "mw_bigdata_test",
-    srcs = ["mw_bigdata_test.py"],
+    srcs = [
+        "conftest.py",
+        "mw_bigdata_test.py",
+    ],
     args = [
         "--docker-image-bootstrap=$(location :test-image-tarball)",
         "--docker-image=mw-com-bigdata-sct:latest",

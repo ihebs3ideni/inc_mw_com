@@ -14,3 +14,6 @@ bazel-*
 *__pycache__*
 .venv/
 *.egg-info/
+
+# artifacts
+*.tar.gz

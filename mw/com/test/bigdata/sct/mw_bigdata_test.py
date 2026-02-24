@@ -22,7 +22,7 @@ def test_lola_bigdata_exchange(docker_sandbox):
             ["/opt/bigdata/bin/bigdata", "--mode", "recv", "-n", "25"],
             workdir="/opt/bigdata",
         )
-        exit_code = docker_sandbox.wait_exec(recv_id, timeout=10)
+        exit_code = docker_sandbox.wait_exec(recv_id, timeout=30)
         assert exit_code == 0, f"Receiver exited with code {exit_code}"
     finally:
         docker_sandbox.kill_exec(sender_id, signal=15)
