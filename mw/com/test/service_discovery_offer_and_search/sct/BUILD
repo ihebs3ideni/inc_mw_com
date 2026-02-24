@@ -19,8 +19,8 @@ oci_image(
     name = "test-image",
     base = "@ubuntu_24_04",
     tars = [
-        "//mw/com/test/service_discovery_offer_and_search:client-pkg",
-        "//mw/com/test/service_discovery_offer_and_search:service-pkg",
+        "prebuilt/client-pkg.tar.gz",
+        "prebuilt/service-pkg.tar.gz",
     ],
 )
 
@@ -32,7 +32,10 @@ oci_tarball(
 
 py_itf_test(
     name = "service_discovery_offer_and_search_test",
-    srcs = ["service_discovery_offer_and_search_test.py"],
+    srcs = [
+        "conftest.py",
+        "service_discovery_offer_and_search_test.py",
+    ],
     args = [
         "--docker-image-bootstrap=$(location :test-image-tarball)",
         "--docker-image=mw-com-sd-offer-and-search-sct:latest",

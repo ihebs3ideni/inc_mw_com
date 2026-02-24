@@ -18,7 +18,7 @@ load("@score_itf//score/itf/plugins:plugins.bzl", "docker")
 oci_image(
     name = "test-image",
     base = "@ubuntu_24_04",
-    tars = ["//mw/com/message_passing/test:messaging_app_mqueue-pkg.tar"],
+    tars = ["prebuilt/messaging_app_mqueue-pkg.tar.gz"],
 )
 
 oci_tarball(

@@ -10,4 +10,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
+import pytest
 
+
+@pytest.fixture(scope="function")
+def docker_sandbox_configuration():
+    """LoLa IPC needs larger shared memory for its data channels."""
+    return {"shm_size": "256m"}

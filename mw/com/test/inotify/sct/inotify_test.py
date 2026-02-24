@@ -11,17 +11,12 @@
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
 
-import sctf
-from sctf.sim.base_sim import BaseSim
 
-class InotifyTest(BaseSim):
-    def __init__(self, environment, **kwargs):
-        args = []
-        super().__init__(environment, "bin/inotify_test", args, cwd="/opt/InotifyTestApp", wait_on_exit=True, use_sandbox=True, **kwargs)
-
-def test_find_all_semantics(adaptive_environment_fixture):
-    with InotifyTest(adaptive_environment_fixture):
-        pass
-
-if __name__ == "__main__":
-    sctf.run(__file__)
+def test_inotify(docker_sandbox):
+    """Run the inotify test binary and wait for it to complete."""
+    exec_id = docker_sandbox.exec(
+        ["/opt/InotifyTestApp/bin/inotify_test"],
+        workdir="/opt/InotifyTestApp",
+    )
+    exit_code = docker_sandbox.wait_exec(exec_id, timeout=30)
+    assert exit_code == 0, f"inotify_test exited with code {exit_code}"

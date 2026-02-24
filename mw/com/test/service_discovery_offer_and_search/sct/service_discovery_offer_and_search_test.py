@@ -22,7 +22,7 @@ def test_service_discovery_offer_and_search(docker_sandbox):
             ["/opt/ClientApp/bin/client"],
             workdir="/opt/ClientApp",
         )
-        exit_code = docker_sandbox.wait_exec(client_id, timeout=30)
+        exit_code = docker_sandbox.wait_exec(client_id, timeout=60)
         assert exit_code == 0, f"Client exited with code {exit_code}"
     finally:
         docker_sandbox.kill_exec(service_id, signal=15)

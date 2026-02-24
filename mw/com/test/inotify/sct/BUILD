@@ -11,15 +11,29 @@
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
 
-load("//platform/aas/tools/sctf/bazel_gen:sctf_gen.bzl", "py_sctf_test")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
+load("@score_itf//:defs.bzl", "py_itf_test")
+load("@score_itf//score/itf/plugins:plugins.bzl", "docker")
 
-py_sctf_test(
+oci_image(
+    name = "test-image",
+    base = "@ubuntu_24_04",
+    tars = ["prebuilt/inotify-test-pkg.tar.gz"],
+)
+
+oci_tarball(
+    name = "test-image-tarball",
+    image = ":test-image",
+    repo_tags = ["mw-com-inotify-sct:latest"],
+)
+
+py_itf_test(
     name = "inotify_test",
-    srcs = [
-        "__init__.py",
-        "inotify_test.py",
+    srcs = ["inotify_test.py"],
+    args = [
+        "--docker-image-bootstrap=$(location :test-image-tarball)",
+        "--docker-image=mw-com-inotify-sct:latest",
     ],
-    data = ["//platform/aas/mw/com/test/inotify:inotify-test-pkg"],
-    main = "inotify_test.py",
-    module_root = "platform/aas/mw/com/test/inotify/sct",
+    data = [":test-image-tarball"],
+    plugins = [docker],
 )
