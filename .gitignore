@@ -1,0 +1,16 @@
+# Bazel
+bazel-*
+MODULE.bazel.lock
+
+.ruff_cache
+
+bazel-*
+.bazelrc
+
+# VS Code
+.vscode
+
+# Python cache/venv folders
+*__pycache__*
+.venv/
+*.egg-info/

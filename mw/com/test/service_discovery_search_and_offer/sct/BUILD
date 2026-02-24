@@ -18,21 +18,24 @@ load("@score_itf//score/itf/plugins:plugins.bzl", "docker")
 oci_image(
     name = "test-image",
     base = "@ubuntu_24_04",
-    tars = ["//mw/com/message_passing/test:messaging_app_mqueue-pkg.tar"],
+    tars = [
+        "//mw/com/test/service_discovery_search_and_offer:client-pkg",
+        "//mw/com/test/service_discovery_search_and_offer:service-pkg",
+    ],
 )
 
 oci_tarball(
     name = "test-image-tarball",
     image = ":test-image",
-    repo_tags = ["mw-com-message-passing-sct:latest"],
+    repo_tags = ["mw-com-sd-search-and-offer-sct:latest"],
 )
 
 py_itf_test(
-    name = "test_basic_message_passing",
-    srcs = ["test_basic_message_passing.py"],
+    name = "service_discovery_search_and_offer_test",
+    srcs = ["service_discovery_search_and_offer_test.py"],
     args = [
         "--docker-image-bootstrap=$(location :test-image-tarball)",
-        "--docker-image=mw-com-message-passing-sct:latest",
+        "--docker-image=mw-com-sd-search-and-offer-sct:latest",
     ],
     data = [":test-image-tarball"],
     plugins = [docker],

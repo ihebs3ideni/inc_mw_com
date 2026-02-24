@@ -11,15 +11,29 @@
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
 
-load("//platform/aas/tools/sctf/bazel_gen:sctf_gen.bzl", "py_sctf_test")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
+load("@score_itf//:defs.bzl", "py_itf_test")
+load("@score_itf//score/itf/plugins:plugins.bzl", "docker")
 
-py_sctf_test(
+oci_image(
+    name = "test-image",
+    base = "@ubuntu_24_04",
+    tars = ["//mw/com/test/shared_memory_storage:shared_memory_storage-pkg.tar"],
+)
+
+oci_tarball(
+    name = "test-image-tarball",
+    image = ":test-image",
+    repo_tags = ["mw-com-shared-memory-storage-sct:latest"],
+)
+
+py_itf_test(
     name = "shared_memory_storage_test",
-    srcs = [
-        "__init__.py",
-        "shared_memory_storage_test.py",
+    srcs = ["shared_memory_storage_test.py"],
+    args = [
+        "--docker-image-bootstrap=$(location :test-image-tarball)",
+        "--docker-image=mw-com-shared-memory-storage-sct:latest",
     ],
-    data = ["//platform/aas/mw/com/test/shared_memory_storage:shared_memory_storage-pkg.tar"],
-    main = "shared_memory_storage_test.py",
-    module_root = "platform/aas/mw/com/test/shared_memory_storage/sct",
+    data = [":test-image-tarball"],
+    plugins = [docker],
 )

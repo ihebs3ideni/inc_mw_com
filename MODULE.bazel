@@ -1,0 +1,73 @@
+# *******************************************************************************
+# Copyright (c) 2025 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Apache License Version 2.0 which is available at
+# https://www.apache.org/licenses/LICENSE-2.0
+#
+# SPDX-License-Identifier: Apache-2.0
+# *******************************************************************************
+module(
+    name = "inc_mw_com",
+    version = "0.0.1",
+    compatibility_level = 0,
+)
+
+###############################################################################
+#
+# Integration Test Framework (score_itf)
+#
+###############################################################################
+bazel_dep(name = "score_itf", version = "0.1.0")
+local_path_override(
+    module_name = "score_itf",
+    path = "../itf",
+)
+
+###############################################################################
+#
+# Container image rules (OCI)
+#
+###############################################################################
+bazel_dep(name = "rules_oci", version = "1.8.0")
+
+# ubuntu_24_04 is pulled by score_itf — reuse it here
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+use_repo(oci, "ubuntu_24_04")
+
+###############################################################################
+#
+# Packaging rules (for pkg_tar used by adaptive application packaging)
+#
+###############################################################################
+bazel_dep(name = "rules_pkg", version = "1.0.1")
+
+###############################################################################
+#
+# C++ rules
+#
+###############################################################################
+bazel_dep(name = "rules_cc", version = "0.1.1")
+
+###############################################################################
+#
+# Python rules
+#
+###############################################################################
+bazel_dep(name = "rules_python", version = "1.4.1")
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    is_default = True,
+    python_version = "3.12",
+)
+
+###############################################################################
+#
+# Skylib
+#
+###############################################################################
+bazel_dep(name = "bazel_skylib", version = "1.9.0")

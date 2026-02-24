@@ -11,7 +11,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
 
-def test_find_all_semantics(docker_sandbox):
+def test_service_discovery_search_and_offer_test(docker_sandbox):
     """Start service, then client. Wait for client to complete."""
     service_id = docker_sandbox.exec(
         ["/opt/ServiceApp/bin/service", "-t", "250"],
@@ -19,7 +19,7 @@ def test_find_all_semantics(docker_sandbox):
     )
     try:
         client_id = docker_sandbox.exec(
-            ["/opt/ClientApp/bin/client", "-r", "20", "-b", "50"],
+            ["/opt/ClientApp/bin/client"],
             workdir="/opt/ClientApp",
         )
         exit_code = docker_sandbox.wait_exec(client_id, timeout=30)

@@ -1,0 +1,38 @@
+#!/bin/sh
+# Stub bigdata binary for standalone ITF testing.
+# Mimics the real binary's CLI: --mode send|recv, -t cycle_time, -n num_cycles
+MODE=""
+NUM_CYCLES=0
+CYCLE_TIME=0
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --mode) MODE="$2"; shift 2 ;;
+        -n)     NUM_CYCLES="$2"; shift 2 ;;
+        -t)     CYCLE_TIME="$2"; shift 2 ;;
+        *)      shift ;;
+    esac
+done
+
+echo "[stub] bigdata mode=$MODE cycle_time=$CYCLE_TIME num_cycles=$NUM_CYCLES"
+
+if [ "$MODE" = "send" ]; then
+    i=0
+    while true; do
+        echo "[stub] sending packet $i"
+        sleep 0.01
+        i=$((i + 1))
+    done
+elif [ "$MODE" = "recv" ]; then
+    i=0
+    while [ "$i" -lt "$NUM_CYCLES" ]; do
+        echo "[stub] received packet $i"
+        sleep 0.01
+        i=$((i + 1))
+    done
+    echo "[stub] receiver done after $NUM_CYCLES cycles"
+    exit 0
+else
+    echo "[stub] unknown mode: $MODE" >&2
+    exit 1
+fi

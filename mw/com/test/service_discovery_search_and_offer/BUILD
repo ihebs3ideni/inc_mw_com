@@ -14,7 +14,6 @@
 load("//bazel/tools:json_schema_validator.bzl", "validate_json_schema_test")
 load("//platform/aas/bazel/packaging:adaptive_application.bzl", "pkg_adaptive_application")
 load("//platform/aas/mw:common_features.bzl", "COMPILER_WARNING_FEATURES")
-load("//platform/aas/tools/sctf/bazel_gen:sctf_gen.bzl", "py_sctf_test")
 
 validate_json_schema_test(
     name = "validate_lola_schema",
@@ -94,18 +93,4 @@ pkg_adaptive_application(
         "//platform/aas/mw/com/test:__pkg__",
         "//platform/aas/test/mw/com:__pkg__",
     ],
-)
-
-py_sctf_test(
-    name = "service_discovery_search_and_offer_test",
-    srcs = [
-        "__init__.py",
-        "service_discovery_search_and_offer_test.py",
-    ],
-    data = [
-        "//platform/aas/mw/com/test/service_discovery_search_and_offer:client-pkg",
-        "//platform/aas/mw/com/test/service_discovery_search_and_offer:service-pkg",
-    ],
-    main = "service_discovery_search_and_offer_test.py",
-    module_root = "platform/aas/mw/com/test/service_discovery_search_and_offer",
 )

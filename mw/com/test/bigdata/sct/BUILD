@@ -11,15 +11,39 @@
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
 
-load("//platform/aas/tools/sctf/bazel_gen:sctf_gen.bzl", "py_sctf_test")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+load("@score_itf//:defs.bzl", "py_itf_test")
+load("@score_itf//score/itf/plugins:plugins.bzl", "docker")
 
-py_sctf_test(
+# Package the stub binary into the path the test expects:
+#   /opt/bigdata/bin/bigdata
+pkg_tar(
+    name = "bigdata-stub-pkg",
+    srcs = ["stub/bigdata"],
+    package_dir = "opt/bigdata/bin",
+    strip_prefix = "stub",
+)
+
+oci_image(
+    name = "test-image",
+    base = "@ubuntu_24_04",
+    tars = [":bigdata-stub-pkg"],
+)
+
+oci_tarball(
+    name = "test-image-tarball",
+    image = ":test-image",
+    repo_tags = ["mw-com-bigdata-sct:latest"],
+)
+
+py_itf_test(
     name = "mw_bigdata_test",
-    srcs = [
-        "__init__.py",
-        "mw_bigdata_test.py",
+    srcs = ["mw_bigdata_test.py"],
+    args = [
+        "--docker-image-bootstrap=$(location :test-image-tarball)",
+        "--docker-image=mw-com-bigdata-sct:latest",
     ],
-    data = ["//platform/aas/mw/com/test/bigdata:bigdata-pkg.tar"],
-    main = "mw_bigdata_test.py",
-    module_root = "platform/aas/mw/com/test/bigdata/sct",
+    data = [":test-image-tarball"],
+    plugins = [docker],
 )

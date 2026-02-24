@@ -11,28 +11,18 @@
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
 
-import sctf
-from sctf.sim.base_sim import BaseSim
-
-
-class Bigdata(BaseSim):
-    def __init__(self, environment, mode, cycle_time=None, num_cycles=None, **kwargs):
-        args = [
-            "--mode", mode,
-        ]
-        if num_cycles is not None:
-            args += ["-n", str(num_cycles)]
-        if cycle_time is not None:
-            args += ["-t", str(cycle_time)]
-        wait_on_exit = num_cycles is not None
-        super().__init__(environment, "bin/bigdata", args, cwd="/opt/bigdata", use_sandbox=True,
-                         wait_on_exit=wait_on_exit, **kwargs)
-
-
-def test_lola_bigdata_exchange(environment):
-    with Bigdata(environment, "send", cycle_time=40), Bigdata(environment, "recv", num_cycles=25, wait_timeout=10):
-        pass
-
-
-if __name__ == "__main__":
-    sctf.run(__file__)
+def test_lola_bigdata_exchange(docker_sandbox):
+    """Start a sender and receiver for bigdata exchange, wait for receiver to complete."""
+    sender_id = docker_sandbox.exec(
+        ["/opt/bigdata/bin/bigdata", "--mode", "send", "-t", "40"],
+        workdir="/opt/bigdata",
+    )
+    try:
+        recv_id = docker_sandbox.exec(
+            ["/opt/bigdata/bin/bigdata", "--mode", "recv", "-n", "25"],
+            workdir="/opt/bigdata",
+        )
+        exit_code = docker_sandbox.wait_exec(recv_id, timeout=10)
+        assert exit_code == 0, f"Receiver exited with code {exit_code}"
+    finally:
+        docker_sandbox.kill_exec(sender_id, signal=15)
