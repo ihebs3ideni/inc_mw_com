@@ -11,18 +11,18 @@
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
 
-def test_service_discovery_offer_and_search(docker_sandbox):
+def test_service_discovery_offer_and_search(target):
     """Start service, then client. Wait for client to complete."""
-    service_id = docker_sandbox.exec(
+    service_id = target.exec(
         ["/opt/ServiceApp/bin/service", "-t", "250"],
         workdir="/opt/ServiceApp",
     )
     try:
-        client_id = docker_sandbox.exec(
+        client_id = target.exec(
             ["/opt/ClientApp/bin/client"],
             workdir="/opt/ClientApp",
         )
-        exit_code = docker_sandbox.wait_exec(client_id, timeout=60)
+        exit_code = target.wait_exec(client_id, timeout=60)
         assert exit_code == 0, f"Client exited with code {exit_code}"
     finally:
-        docker_sandbox.kill_exec(service_id, signal=15)
+        target.kill_exec(service_id, signal=15)

@@ -13,7 +13,7 @@
 import pytest
 
 
-@pytest.fixture(scope="function")
-def docker_sandbox_configuration():
+@pytest.fixture(scope="session")
+def docker_configuration():
     """LoLa IPC needs larger shared memory for its data channels."""
     return {"shm_size": "256m"}

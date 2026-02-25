@@ -12,11 +12,11 @@
 # *******************************************************************************
 
 
-def test_inotify(docker_sandbox):
+def test_inotify(target):
     """Run the inotify test binary and wait for it to complete."""
-    exec_id = docker_sandbox.exec(
+    exec_id = target.exec(
         ["/opt/InotifyTestApp/bin/inotify_test"],
         workdir="/opt/InotifyTestApp",
     )
-    exit_code = docker_sandbox.wait_exec(exec_id, timeout=30)
+    exit_code = target.wait_exec(exec_id, timeout=30)
     assert exit_code == 0, f"inotify_test exited with code {exit_code}"
