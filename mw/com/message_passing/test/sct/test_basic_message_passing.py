@@ -11,55 +11,36 @@
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
 
-import sctf
-
-class Commander(sctf.BaseSim):
-    def __init__(self, environment):
-        super().__init__(
-            environment=environment,
-            binary_path="bin/messaging_app_mqueue",
-            args=["-m", "send", "-n", "10", "-b", "5"],
-            wait_on_exit=True,
-            cwd="/opt/messaging_app_mqueue",
-            enforce_clean_shutdown=True,
-        )
+COMMANDER_CMD = ["/opt/messaging_app_mqueue/bin/messaging_app_mqueue", "-m", "send", "-n", "10", "-b", "5"]
+CONTROLLER_CMD = ["/opt/messaging_app_mqueue/bin/messaging_app_mqueue", "-m", "recv", "-n", "10", "-b", "5"]
+WORKDIR = "/opt/messaging_app_mqueue"
 
 
-class Controller(sctf.BaseSim):
-    def __init__(self, environment):
-        super().__init__(
-            environment=environment,
-            binary_path="bin/messaging_app_mqueue",
-            args=["-m", "recv", "-n", "10", "-b", "5"],
-            wait_on_exit=True,
-            cwd="/opt/messaging_app_mqueue",
-            enforce_clean_shutdown=True,
-        )
-
-
-def test_basic_message_passing_commander_first(simple_environment_fixture):
+def test_basic_message_passing_commander_first(target):
     """
-    !@brief Start one commander which will wait until a Controller is there. Once the controller is started, the
-            commander is started, the commander will send a sequence of messages. This sequence of messages is then
-            printed and checked for validity by the controller.
+    Start commander (sender) first, then controller (receiver).
+    Commander sends a sequence of messages validated by the controller.
     """
+    commander_id = target.exec(COMMANDER_CMD, workdir=WORKDIR)
+    controller_id = target.exec(CONTROLLER_CMD, workdir=WORKDIR)
 
-    with Commander(simple_environment_fixture):
-        with Controller(simple_environment_fixture):
-            pass
+    controller_exit = target.wait_exec(controller_id, timeout=30)
+    assert controller_exit == 0, f"Controller exited with code {controller_exit}"
+
+    commander_exit = target.wait_exec(commander_id, timeout=30)
+    assert commander_exit == 0, f"Commander exited with code {commander_exit}"
 
 
-def test_basic_message_passing_controller_first(simple_environment_fixture):
+def test_basic_message_passing_controller_first(target):
     """
-    !@brief Start a controller first. Once the controller is started, the
-            commander is started, the commander will send a sequence of messages. This sequence of messages is then
-            printed and checked for validity by the controller.
+    Start controller (receiver) first, then commander (sender).
+    Commander sends a sequence of messages validated by the controller.
     """
+    controller_id = target.exec(CONTROLLER_CMD, workdir=WORKDIR)
+    commander_id = target.exec(COMMANDER_CMD, workdir=WORKDIR)
 
-    with Controller(simple_environment_fixture):
-        with Commander(simple_environment_fixture):
-            pass
+    commander_exit = target.wait_exec(commander_id, timeout=30)
+    assert commander_exit == 0, f"Commander exited with code {commander_exit}"
 
-
-if __name__ == "__main__":
-    sctf.run(__file__)
+    controller_exit = target.wait_exec(controller_id, timeout=30)
+    assert controller_exit == 0, f"Controller exited with code {controller_exit}"

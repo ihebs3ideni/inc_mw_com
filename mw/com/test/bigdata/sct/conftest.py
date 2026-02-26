@@ -10,13 +10,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
+import pytest
 
 
-def test_inotify(target):
-    """Run the inotify test binary and wait for it to complete."""
-    exec_id = target.exec(
-        ["/opt/InotifyTestApp/bin/inotify_test"],
-        workdir="/opt/InotifyTestApp",
-    )
-    exit_code = target.wait_exec(exec_id, timeout=30)
-    assert exit_code == 0, f"inotify_test exited with code {exit_code}"
+@pytest.fixture(scope="function")
+def docker_configuration():
+    """LoLa IPC needs larger shared memory for its data channels."""
+    return {"shm_size": "256m"}

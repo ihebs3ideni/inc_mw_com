@@ -11,18 +11,18 @@
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
 
-def test_lola_bigdata_exchange(target):
-    """Start a sender and receiver for bigdata exchange, wait for receiver to complete."""
-    sender_id = target.exec(
-        ["/opt/bigdata/bin/bigdata", "--mode", "send", "-t", "40"],
-        workdir="/opt/bigdata",
+def test_service_discovery_search_and_offer_test(docker_sandbox):
+    """Start service, then client. Wait for client to complete."""
+    service_id = docker_sandbox.exec(
+        ["/opt/ServiceApp/bin/service", "-t", "250"],
+        workdir="/opt/ServiceApp",
     )
     try:
-        recv_id = target.exec(
-            ["/opt/bigdata/bin/bigdata", "--mode", "recv", "-n", "25"],
-            workdir="/opt/bigdata",
+        client_id = docker_sandbox.exec(
+            ["/opt/ClientApp/bin/client"],
+            workdir="/opt/ClientApp",
         )
-        exit_code = target.wait_exec(recv_id, timeout=30)
-        assert exit_code == 0, f"Receiver exited with code {exit_code}"
+        exit_code = docker_sandbox.wait_exec(client_id, timeout=30)
+        assert exit_code == 0, f"Client exited with code {exit_code}"
     finally:
-        target.kill_exec(sender_id, signal=15)
+        docker_sandbox.kill_exec(service_id, signal=15)

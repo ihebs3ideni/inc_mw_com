@@ -11,25 +11,18 @@
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
 
-import sctf
-from sctf.sim.base_sim import BaseSim
-
-
-class Client(BaseSim):
-    def __init__(self, environment, **kwargs):
-        args = ["-r", "20", "-b", "50"]
-        super().__init__(environment, "bin/client", args, cwd="/opt/ClientApp", use_sandbox=True, wait_on_exit=True,
-                         **kwargs)
-
-class Service(BaseSim):
-    def __init__(self, environment, **kwargs):
-        args = ["-t", "250"]
-        super().__init__(environment, "bin/service", args, cwd="/opt/ServiceApp", use_sandbox=True, **kwargs)
-
-def test_find_all_semantics(adaptive_environment_fixture):
-    with Service(adaptive_environment_fixture):
-        with Client(adaptive_environment_fixture):
-            pass
-
-if __name__ == "__main__":
-    sctf.run(__file__)
+def test_find_all_semantics(docker_sandbox):
+    """Start service, then client. Wait for client to complete."""
+    service_id = docker_sandbox.exec(
+        ["/opt/ServiceApp/bin/service", "-t", "250"],
+        workdir="/opt/ServiceApp",
+    )
+    try:
+        client_id = docker_sandbox.exec(
+            ["/opt/ClientApp/bin/client", "-r", "20", "-b", "50"],
+            workdir="/opt/ClientApp",
+        )
+        exit_code = docker_sandbox.wait_exec(client_id, timeout=30)
+        assert exit_code == 0, f"Client exited with code {exit_code}"
+    finally:
+        docker_sandbox.kill_exec(service_id, signal=15)

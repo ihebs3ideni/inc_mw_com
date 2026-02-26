@@ -15,29 +15,27 @@ load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
 load("@score_itf//:defs.bzl", "py_itf_test")
 load("@score_itf//score/itf/plugins:plugins.bzl", "docker")
 
-# Use the pre-built bigdata package from the monorepo.
-# Contains opt/bigdata/bin/bigdata + config files in opt/bigdata/etc/
 oci_image(
     name = "test-image",
     base = "@ubuntu_24_04",
-    tars = ["prebuilt/bigdata-pkg.tar.gz"],
+    tars = [
+        "//mw/com/test/service_discovery_search_and_offer:client-pkg",
+        "//mw/com/test/service_discovery_search_and_offer:service-pkg",
+    ],
 )
 
 oci_tarball(
     name = "test-image-tarball",
     image = ":test-image",
-    repo_tags = ["mw-com-bigdata-sct:latest"],
+    repo_tags = ["mw-com-sd-search-and-offer-sct:latest"],
 )
 
 py_itf_test(
-    name = "mw_bigdata_test",
-    srcs = [
-        "conftest.py",
-        "mw_bigdata_test.py",
-    ],
+    name = "service_discovery_search_and_offer_test",
+    srcs = ["service_discovery_search_and_offer_test.py"],
     args = [
         "--docker-image-bootstrap=$(location :test-image-tarball)",
-        "--docker-image=mw-com-bigdata-sct:latest",
+        "--docker-image=mw-com-sd-search-and-offer-sct:latest",
     ],
     data = [":test-image-tarball"],
     plugins = [docker],
